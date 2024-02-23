@@ -1,0 +1,12 @@
+apiVersion: demo.demo.jonlimpw.io/v1
+kind: DeploymentLabelCheck
+metadata:
+  labels:
+    app.kubernetes.io/name: deploymentlabelcheck
+    app.kubernetes.io/instance: deploymentlabelcheck-sample
+    app.kubernetes.io/part-of: k8builder-demo
+    app.kubernetes.io/managed-by: kustomize
+    app.kubernetes.io/created-by: k8builder-demo
+  name: deploymentlabelcheck-sample
+spec:
+  # TODO(user): Add fields here
