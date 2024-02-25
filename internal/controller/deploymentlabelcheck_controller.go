@@ -19,7 +19,9 @@ package controller
 import (
 	"context"
 
+	"k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/runtime"
+	"k8s.io/apimachinery/pkg/types"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/log"
@@ -46,16 +48,46 @@ type DeploymentLabelCheckReconciler struct {
 //
 // For more details, check Reconcile and its Result here:
 // - https://pkg.go.dev/sigs.k8s.io/controller-runtime@v0.17.0/pkg/reconcile
+
+// Controller will only kick start if CRD object is created from the start. If no CRD object created, this will not log any error. That is actually handled by SetUpManagerComponent. Code is commented out
 func (r *DeploymentLabelCheckReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Result, error) {
-	_ = log.FromContext(ctx)
+	l := log.FromContext(ctx)
+	l.Info("Enter Reconcile", "req", req)
 
-	// TODO(user): your logic here
+	// Fetch the DeploymentLabelCheck CRD
+	dlc := &demov1.DeploymentLabelCheck{}
+	err := r.Get(ctx, types.NamespacedName{Namespace: req.Namespace, Name: req.Name}, dlc)
 
+	l.Info("Enter Reconcile", "spec", dlc.Spec, "status", dlc.Status)
+	if err == nil {
+		l.Info("DLC Found")
+		return ctrl.Result{}, nil
+	}
+
+	if !errors.IsNotFound(err) {
+		return ctrl.Result{}, err
+	}
+
+	l.Info("DLC Not found")
 	return ctrl.Result{}, nil
 }
 
 // SetupWithManager sets up the controller with the Manager.
 func (r *DeploymentLabelCheckReconciler) SetupWithManager(mgr ctrl.Manager) error {
+
+	// // Check if DeploymentLabelCheck exists before setting up the controller
+	// dlc := &demov1.DeploymentLabelCheck{}
+	// err := mgr.GetClient().Get(context.Background(), client.ObjectKey{Namespace: "your-namespace", Name: "your-name"}, dlc)
+
+	// if errors.IsNotFound(err) {
+	// 	log.Log.Info("DeploymentLabelCheck not found at the start of the controller setup")
+	// } else if err != nil {
+	// 	log.Log.Error(err, "Error checking for DeploymentLabelCheck existence")
+	// 	return err
+	// } else {
+	// 	log.Log.Info("DeploymentLabelCheck found at the start of the controller setup")
+	// }
+
 	return ctrl.NewControllerManagedBy(mgr).
 		For(&demov1.DeploymentLabelCheck{}).
 		Complete(r)
