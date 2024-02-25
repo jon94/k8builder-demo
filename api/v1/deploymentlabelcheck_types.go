@@ -29,7 +29,8 @@ type DeploymentLabelCheckSpec struct {
 	// Important: Run "make" to regenerate code after modifying this file
 
 	// Foo is an example field of DeploymentLabelCheck. Edit deploymentlabelcheck_types.go to remove/update
-	Foo string `json:"foo,omitempty"`
+	Namespace      string `json:"Namespace,omitempty"`
+	DeploymentName string `json:"DeploymentName,omitempty"`
 }
 
 // DeploymentLabelCheckStatus defines the observed state of DeploymentLabelCheck

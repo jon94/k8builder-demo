@@ -3,9 +3,9 @@ kind: Deployment
 metadata:
   labels:
     tags.datadoghq.com/env: kubebuilder
-    tags.datadoghq.com/service: adservice_libinject
+    tags.datadoghq.com/service: adservice_nolabel
     tags.datadoghq.com/version: 1.0.0
-  name: adservice-libinject
+  name: adservice-nolabel
   namespace: kubebuilder
 spec:
   progressDeadlineSeconds: 600
@@ -23,10 +23,9 @@ spec:
     metadata:
       creationTimestamp: null
       labels:
-        admission.datadoghq.com/enabled: "true"
         app: adservice
         tags.datadoghq.com/env: kubebuilder
-        tags.datadoghq.com/service: adservice_libinject
+        tags.datadoghq.com/service: adservice_nolabel
         tags.datadoghq.com/version: 1.0.0
       annotations:
         admission.datadoghq.com/python-lib.version: v2.6.5	
