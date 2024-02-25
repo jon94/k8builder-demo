@@ -119,6 +119,14 @@ func (r *DeploymentLabelCheckReconciler) checklabel(ctx context.Context, dlc *de
 		return ctrl.Result{}, nil
 	} else {
 		l.Info("Not there > Label admission.datadoghq.com/enabled")
+		if deployment.Spec.Template.ObjectMeta.Labels == nil {
+			deployment.Spec.Template.ObjectMeta.Labels = make(map[string]string)
+		}
+		deployment.Spec.Template.ObjectMeta.Labels["admission.datadoghq.com/enabled"] = "true"
+		if err := r.Update(ctx, deployment); err != nil {
+			l.Error(err, "Failed to update Deployment labels")
+			return ctrl.Result{}, err
+		}
 	}
 	return ctrl.Result{}, nil
 }
