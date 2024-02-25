@@ -77,7 +77,7 @@ func (r *DeploymentLabelCheckReconciler) Reconcile(ctx context.Context, req ctrl
 	return ctrl.Result{}, nil
 }
 
-// Fetch the Deployment resource in the same namespace
+// Fetch the Deployment resource using info from CRD
 func (r *DeploymentLabelCheckReconciler) reconcileDeployment(ctx context.Context, dlc *demov1.DeploymentLabelCheck, req ctrl.Request) (ctrl.Result, error) {
 	l := log.FromContext(ctx)
 	l.Info("Enter DeploymentReconcile", "req", req)
@@ -88,6 +88,7 @@ func (r *DeploymentLabelCheckReconciler) reconcileDeployment(ctx context.Context
 
 	if err == nil {
 		l.Info("Deployment Found", "name", deployment.Name, "namespace", deployment.Namespace)
+		r.checklabel(ctx, dlc, deployment, req)
 		return ctrl.Result{}, nil
 	}
 
@@ -96,6 +97,29 @@ func (r *DeploymentLabelCheckReconciler) reconcileDeployment(ctx context.Context
 	}
 
 	l.Info("Deployment Not found")
+	return ctrl.Result{}, nil
+}
+
+// check if label is present, if yes do nothing. If no, label the deployment.
+
+func (r *DeploymentLabelCheckReconciler) checklabel(ctx context.Context, dlc *demov1.DeploymentLabelCheck, deployment *appsv1.Deployment, req ctrl.Request) (ctrl.Result, error) {
+	l := log.FromContext(ctx)
+	l.Info("Enter CheckLabelPresent", "req", req)
+	// Check if the label is already present in the template metadata
+	if deployment.Spec.Template.ObjectMeta.Labels != nil {
+		if value, exists := deployment.Spec.Template.ObjectMeta.Labels["admission.datadoghq.com/enabled"]; exists && value == "true" {
+			// Label is already present and set to true, do nothing
+			l.Info("Label admission.datadoghq.com/enabled is already set to true")
+			return ctrl.Result{}, nil
+		}
+	}
+	if value, exists := deployment.Spec.Template.ObjectMeta.Labels["admission.datadoghq.com/enabled"]; exists && value == "false" {
+		// Label is already present and set to false, do nothing
+		l.Info("Label admission.datadoghq.com/enabled is already set to false")
+		return ctrl.Result{}, nil
+	} else {
+		l.Info("Not there > Label admission.datadoghq.com/enabled")
+	}
 	return ctrl.Result{}, nil
 }
 

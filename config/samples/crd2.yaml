@@ -8,7 +8,7 @@ metadata:
     app.kubernetes.io/part-of: k8builder-demo
     app.kubernetes.io/managed-by: kustomize
     app.kubernetes.io/created-by: k8builder-demo
-  name: deploymentlabelcheck-nolabel
+  name: deploymentlabelcheck-libinject
 spec:
   Namespace: kubebuilder
-  DeploymentName: adservice-nolabel
+  DeploymentName: adservice-libinject
