@@ -1,6 +1,7 @@
 apiVersion: demo.demo.jonlimpw.io/v1
 kind: DeploymentLabelCheck
 metadata:
+  namespace: kubebuilder
   labels:
     app.kubernetes.io/name: deploymentlabelcheck
     app.kubernetes.io/instance: deploymentlabelcheck-sample
