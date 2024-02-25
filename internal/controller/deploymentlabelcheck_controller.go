@@ -27,6 +27,8 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/log"
 
 	demov1 "operator-demo/api/v1"
+
+	appsv1 "k8s.io/api/apps/v1"
 )
 
 // DeploymentLabelCheckReconciler reconciles a DeploymentLabelCheck object
@@ -59,8 +61,11 @@ func (r *DeploymentLabelCheckReconciler) Reconcile(ctx context.Context, req ctrl
 	err := r.Get(ctx, types.NamespacedName{Namespace: req.Namespace, Name: req.Name}, dlc)
 
 	l.Info("Enter Reconcile", "spec", dlc.Spec, "status", dlc.Status)
+
 	if err == nil {
 		l.Info("DLC Found")
+		// call func reconcileDeployment if DLC is found
+		r.reconcileDeployment(ctx, dlc, req)
 		return ctrl.Result{}, nil
 	}
 
@@ -69,6 +74,28 @@ func (r *DeploymentLabelCheckReconciler) Reconcile(ctx context.Context, req ctrl
 	}
 
 	l.Info("DLC Not found")
+	return ctrl.Result{}, nil
+}
+
+// Fetch the Deployment resource in the same namespace
+func (r *DeploymentLabelCheckReconciler) reconcileDeployment(ctx context.Context, dlc *demov1.DeploymentLabelCheck, req ctrl.Request) (ctrl.Result, error) {
+	l := log.FromContext(ctx)
+	l.Info("Enter DeploymentReconcile", "req", req)
+
+	deployment := &appsv1.Deployment{}
+	err := r.Get(ctx, client.ObjectKey{Namespace: dlc.Spec.Namespace, Name: dlc.Spec.DeploymentName}, deployment)
+	l.Info("Enter DeploymentReconcile", "spec", deployment.Spec, "status", deployment.Status)
+
+	if err == nil {
+		l.Info("Deployment Found", "name", deployment.Name, "namespace", deployment.Namespace)
+		return ctrl.Result{}, nil
+	}
+
+	if !errors.IsNotFound(err) {
+		return ctrl.Result{}, err
+	}
+
+	l.Info("Deployment Not found")
 	return ctrl.Result{}, nil
 }
 
