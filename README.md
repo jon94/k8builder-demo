@@ -1,4 +1,4 @@
-# k8builder-demo
+# k8builder-demo-nolabel
 1. Scaffold
 ```
 kubebuilder init --domain demo.jonlimpw.io --repo operator-demo

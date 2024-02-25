@@ -119,7 +119,7 @@ func (r *DeploymentLabelCheckReconciler) checklabel(ctx context.Context, dlc *de
 		l.Info("Label admission.datadoghq.com/enabled is already set to false")
 		return ctrl.Result{}, nil
 	} else {
-		l.Info("Not there > Label admission.datadoghq.com/enabled")
+		l.Info("Not there > Label admission.datadoghq.com/enabled, setting label and rollout restart deployment happening..")
 		if deployment.Spec.Template.ObjectMeta.Labels == nil {
 			deployment.Spec.Template.ObjectMeta.Labels = make(map[string]string)
 		}
