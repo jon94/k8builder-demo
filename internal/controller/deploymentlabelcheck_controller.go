@@ -18,6 +18,7 @@ package controller
 
 import (
 	"context"
+	"strconv"
 
 	"k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/runtime"
@@ -127,8 +128,41 @@ func (r *DeploymentLabelCheckReconciler) checklabel(ctx context.Context, dlc *de
 			l.Error(err, "Failed to update Deployment labels")
 			return ctrl.Result{}, err
 		}
+		//rollout restart deployment
+		if err := r.restartDeployment(ctx, deployment); err != nil {
+			l.Error(err, "Failed to restart Deployment")
+			return ctrl.Result{}, err
+		}
 	}
 	return ctrl.Result{}, nil
+}
+
+// Implement Function for rollout restart via incrementing restartAt annotation
+func (r *DeploymentLabelCheckReconciler) restartDeployment(ctx context.Context, deployment *appsv1.Deployment) error {
+	l := log.FromContext(ctx)
+
+	// Retrieve the deployment's current annotations
+	annotations := deployment.ObjectMeta.Annotations
+
+	// Increment the "deployment.kubernetes.io/restartedAt" annotation to trigger a rollout restart
+	if annotations == nil {
+		annotations = make(map[string]string)
+	}
+	restartedAt, exists := annotations["deployment.kubernetes.io/restartedAt"]
+	if !exists {
+		restartedAt = "1"
+	} else {
+		restartedAtInt, err := strconv.Atoi(restartedAt)
+		if err != nil {
+			return err
+		}
+		restartedAt = strconv.Itoa(restartedAtInt + 1)
+	}
+
+	annotations["deployment.kubernetes.io/restartedAt"] = restartedAt
+	deployment.ObjectMeta.Annotations = annotations
+	l.Info("Deployment restarted using rollout restart strategy")
+	return nil
 }
 
 // SetupWithManager sets up the controller with the Manager.
