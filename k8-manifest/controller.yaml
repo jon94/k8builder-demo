@@ -1,0 +1,17 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: k8buildernolabel-controller
+spec:
+  replicas: 1  
+  selector:
+    matchLabels:
+      app: k8nolabel
+  template:
+    metadata:
+      labels:
+        app: k8nolabel
+    spec:
+      containers:
+      - name: k8buildernolabel
+        image: jonlimpw/k8buildernolabel:latest
