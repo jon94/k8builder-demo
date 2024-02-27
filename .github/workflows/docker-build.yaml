@@ -1,0 +1,34 @@
+name: Docker Image CI 
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+
+jobs:     
+  build_test_push:
+    name: build_test_push
+    permissions: write-all
+    runs-on: ubuntu-latest 
+    env:
+      DOCKER_REPOSITORY: jonlimpw # name of Docker Hub ID
+      IMAGE_NAME: k8buildernolabel
+      
+    steps:
+    - uses: actions/checkout@v2
+
+    - name: Setup Go environment
+      uses: actions/setup-go@v5.0.0   
+          
+    - name: Build Docker Image 
+      uses: mr-smithers-excellent/docker-build-push@v4
+      with:
+        image: ${{ env.DOCKER_REPOSITORY }}/${{ env.IMAGE_NAME }}
+        registry: docker.io
+        tag: latest
+        username: ${{ secrets.DOCKER_USERNAME }}
+        password: ${{ secrets.DOCKER_PASSWORD }}
+
+
+          
