@@ -26,3 +26,50 @@ spec:
       annotations:
         admission.datadoghq.com/python-lib.version: v2.6.5
 ```
+4. Ensure proper RBAC
+```YAML
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: deployment-reader-role
+rules:
+- apiGroups: ["apps"]
+  resources: ["deployments"]
+  verbs: ["get", "list", "update", "watch", "patch"]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: deployment-reader-binding
+subjects:
+- kind: ServiceAccount
+  name: default
+  namespace: kubebuilder
+roleRef:
+  kind: ClusterRole
+  name: deployment-reader-role
+  apiGroup: rbac.authorization.k8s.io
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: deploymentlabelcheck-reader-role
+rules:
+- apiGroups: ["demo.demo.jonlimpw.io"]
+  resources: ["deploymentlabelchecks"]
+  verbs: ["get", "list", "update", "watch", "patch"]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: deploymentlabelcheck-reader-binding
+subjects:
+- kind: ServiceAccount
+  name: default
+  namespace: kubebuilder
+roleRef:
+  kind: ClusterRole
+  name: deploymentlabelcheck-reader-role
+  apiGroup: rbac.authorization.k8s.io
+
+```
