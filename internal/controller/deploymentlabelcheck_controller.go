@@ -68,15 +68,15 @@ func (r *DeploymentLabelCheckReconciler) Reconcile(ctx context.Context, req ctrl
 		l.Info("DLC Found")
 		// call func reconcileDeployment if DLC is found
 		r.reconcileDeployment(ctx, dlc, req)
-		return ctrl.Result{}, nil
+		return ctrl.Result{RequeueAfter: 15 * time.Minute}, nil
 	}
 
 	if !errors.IsNotFound(err) {
-		return ctrl.Result{}, err
+		return ctrl.Result{RequeueAfter: 15 * time.Minute}, err
 	}
 
 	l.Info("DLC Not found")
-	return ctrl.Result{}, nil
+	return ctrl.Result{RequeueAfter: 15 * time.Minute}, nil
 }
 
 // Fetch the Deployment resource using info from CRD
@@ -91,7 +91,7 @@ func (r *DeploymentLabelCheckReconciler) reconcileDeployment(ctx context.Context
 	if err == nil {
 		l.Info("Deployment Found", "name", deployment.Name, "namespace", deployment.Namespace)
 		r.checklabel(ctx, dlc, deployment, req)
-		return ctrl.Result{RequeueAfter: 15 * time.Minute}, nil
+		return ctrl.Result{}, nil
 	}
 
 	if !errors.IsNotFound(err) {
@@ -99,7 +99,7 @@ func (r *DeploymentLabelCheckReconciler) reconcileDeployment(ctx context.Context
 	}
 
 	l.Info("Deployment Not found")
-	return ctrl.Result{RequeueAfter: 15 * time.Minute}, nil //added requeueafter to queue every 15 minutes
+	return ctrl.Result{}, nil //added requeueafter to queue every 15 minutes
 }
 
 // check if label is present, if yes do nothing. If no, label the deployment.
@@ -135,7 +135,7 @@ func (r *DeploymentLabelCheckReconciler) checklabel(ctx context.Context, dlc *de
 			return ctrl.Result{}, err
 		}
 	}
-	return ctrl.Result{RequeueAfter: 15 * time.Minute}, nil
+	return ctrl.Result{}, nil
 }
 
 // Implement Function for rollout restart via incrementing restartAt annotation
